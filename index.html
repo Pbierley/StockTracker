@@ -17,10 +17,11 @@
       <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Navbar</a>
+          <div class="d-flex ms-auto"></div>
           <button
             type="button"
             id="LoginButton"
-            class="btn btn-primary"
+            class="btn btn-primary me-2"
             data-bs-toggle="collapse"
             data-bs-target="#LoginForm"
             aria-controls="navbarSupportedContent"
@@ -208,6 +209,7 @@
       let textResponse;
       let loginArray;
       let stocksArray;
+      let stockComments;
       let userData;
 
       //event Listners
@@ -261,8 +263,8 @@
 
       //Functions
       async function fetchData() {
+        if (event) event.preventDefault();
         console.log("fetch running");
-        event.preventDefault();
         try {
           const response = await fetch(API_URL);
           const jsonText = await response.text();
@@ -270,20 +272,16 @@
           loginArray = textResponse[0];
           stocksArray = textResponse[1];
           displayStocks();
-          // console.log(textResponse);
-          // console.log(loginArray);
-          // console.log(stocksArray);
         } catch (error) {
           console.error("Error fetching data:", error);
         }
       }
       function displayStocks() {
+        stockContainer.innerHTML = "";
         stocksArray.forEach(displayStock);
-        //loadComments();
       }
 
       function displayStock(item, index, arr) {
-        //console.log(stockContainer);
         stockContainer.innerHTML += `
           <div class="card" id="index-${index}">
             <div class="card-body">
@@ -291,7 +289,7 @@
               <h5 class="card-title">${arr[index].name}</h5>
               <h5 class="card-title">${arr[index].ticker}</h5>
               <h5 class="card-title">${arr[index].marketCap}</h5>
-              <h5 class="card-title">${arr[index].peRaio}</h5>
+              <h5 class="card-title">P/E ratio: ${arr[index].peRatio}</h5>
             </div>
               <ul id="commentList-${index}" class="list-group list-group-flush"></ul>
             <div class="card-footer">
@@ -301,7 +299,6 @@
           </div>
         `;
         //add if check to see if they have comments if so load them in here like this
-        console.log(item.comments);
         if (item.comments && item.comments.length > 0) {
           const commentList = document.getElementById(`commentList-${index}`);
           item.comments.forEach((comment) => {
@@ -386,18 +383,53 @@
         });
         bsCollapse.hide();
       }
-      function addComment(index) {
-        const cardFooter = document.querySelector(
-          `#index-${index} .card-footer`
-        );
-        if (cardFooter) {
-          let stockComments = document.createElement("p");
-          stockComments.textContent = document.getElementById(
-            `commentInput-${index}`
-          ).value;
-          stockComments.textContent += ` -user ${userData.email}`;
-          cardFooter.appendChild(stockComments);
+      async function addComment(index) {
+        const commentInput = document.getElementById(`commentInput-${index}`);
+        const commentText = commentInput.value.trim();
+        console.log("commentText - " + commentText);
+        if (!commentText) {
+          alert("Please enter a comment before posting.");
+          return;
         }
+
+        // Construct the new comment object
+        const newComment = {
+          userEmail: userData.email,
+          UserComment: commentText,
+        };
+
+        try {
+          // Fetch the existing stock data
+          const response = await fetch(API_URL);
+          if (!response.ok) throw new Error("Failed to fetch stock data.");
+
+          // Locate the correct stock inside stocks array
+          const data = await response.json();
+          console.log("data returned from add comment" + data);
+          //gets stock array from data then the stock then the comments
+          const comment = data[1]?.[index]?.comments;
+          data[1]?.[index]?.comments.push(newComment);
+
+          // Send updated data back to the API (PUT or PATCH request)
+          const updateResponse = await fetch(`${API_URL}/${index}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (!updateResponse.ok) throw new Error("Failed to update comments.");
+
+          // Clear input field
+          commentInput.value = "";
+        } catch (error) {
+          console.error("Error adding comment:", error);
+          alert("Error adding comment. Please try again.");
+        }
+        // Update UI dynamically
+        fetchData();
+        displayStocks();
       }
     </script>
   </body>
