@@ -157,6 +157,8 @@
             </form>
           </div>
         </div>
+        <!-- HERE is where add stock will be -->
+        <div></div>
         <!-- HERE is where the stocks will go  -->
         <div class="container-fluid" id="stockContainerDiv"></div>
       </div>
@@ -284,19 +286,19 @@
       }
 
       function verifyLogin() {
-        loginArray.forEach(compareLogin);
-      }
-      function compareLogin(item, index, arr) {
-        if (
-          arr[index].email == userData.email &&
-          arr[index].password == userData.password
-        ) {
-          console.log("IT WORKED");
-          showSucess();
-          hideLogin();
-        } else {
-          showFailedAlert();
+        for (let index = 0; index < loginArray.length; index++) {
+          if (
+            loginArray[index].email === userData.email &&
+            loginArray[index].password === userData.password
+          ) {
+            console.log("IT WORKED");
+            showSucess();
+            hideLogin();
+            return; // Stop checking further
+          }
         }
+        // If no match was found, show failed alert
+        showFailedAlert();
       }
       async function createNewLogin(userData) {
         try {
