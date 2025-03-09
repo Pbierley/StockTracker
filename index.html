@@ -273,13 +273,18 @@
       function displayStock(item, index, arr) {
         //console.log(stockContainer);
         stockContainer.innerHTML += `
-          <div class="card">
+          <div class="card" id="index-${index}">
             <div class="card-body">
-            <img  class="rounded float-start w-25" src=${arr[index].logoUrl} alt="${arr[index].name} logo">
-            <h5 class="card-title">${arr[index].name}</h5>
-            <h5 class="card-title">${arr[index].ticker}</h5>
-            <h5 class="card-title">${arr[index].marketCap}</h5>
-            <h5 class="card-title">${arr[index].peRaio}</h5>
+              <img  class="rounded float-start w-25" src=${arr[index].logoUrl} alt="${arr[index].name} logo">
+              <h5 class="card-title">${arr[index].name}</h5>
+              <h5 class="card-title">${arr[index].ticker}</h5>
+              <h5 class="card-title">${arr[index].marketCap}</h5>
+              <h5 class="card-title">${arr[index].peRaio}</h5>
+            </div>
+              <ul id="commentList-1" class="list-group list-group-flush"></ul>
+            <div class="card-footer">
+              <input type="text" id="commentInput-${index}" class="form-control" placeholder="Add a comment">
+              <button class="btn btn-primary btn-sm mt-2" onclick="addComment(${index})">Post Comment</button>
             </div>
           </div>
         `;
@@ -357,6 +362,18 @@
           toggle: false,
         });
         bsCollapse.hide();
+      }
+      function addComment(index) {
+        const cardFooter = document.querySelector(
+          `#index-${index} .card-footer`
+        );
+        if (cardFooter) {
+          let stockComments = document.createElement("p");
+          stockComments.textContent = document.getElementById(
+            `commentInput-${index}`
+          ).value;
+          cardFooter.appendChild(stockComments);
+        }
       }
     </script>
   </body>
