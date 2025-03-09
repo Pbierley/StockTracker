@@ -7,15 +7,36 @@
     {
       "email": "test@gmail.com",
       "password": "password"
+    },
+    {
+      "email": "123",
+      "password": "123"
+    },
+    {
+      "email": "1234",
+      "password": "1234"
+    },
+    {
+      "email": "FakeEmail@gmail.com",
+      "password": "Password123"
     }
   ],
   [
     {
       "name": "Apple Inc.",
       "ticker": "AAPL",
-      "marketCap": "2.8T",
       "peRatio": "29.5",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCvh-j7HsTHJ8ZckknAoiZMx9VcFmsFkv72g&s"
+      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCvh-j7HsTHJ8ZckknAoiZMx9VcFmsFkv72g&s",
+      "comments": [
+        {
+          "userEmail": "example.domain.com",
+          "UserComment": "I Like apple but not at these lofty valuations"
+        },
+        {
+          "userEmail": "example2.domain.com",
+          "UserComment": "IM SELLING"
+        }
+      ]
     },
     {
       "name": "Microsoft Corp.",
