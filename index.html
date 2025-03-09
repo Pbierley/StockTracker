@@ -372,6 +372,7 @@
           stockComments.textContent = document.getElementById(
             `commentInput-${index}`
           ).value;
+          stockComments.textContent += ` -user ${userData.email}`;
           cardFooter.appendChild(stockComments);
         }
       }
