@@ -211,6 +211,7 @@
       let stocksArray;
       let stockComments;
       let userData;
+      let loggedIn;
 
       //event Listners
       SignupButton.addEventListener("click", function () {
@@ -247,7 +248,6 @@
 
         // Store in a variable
         userData = { email, password };
-        console.log(userData.email);
         verifyLogin();
       });
       SignupSubmit.addEventListener("click", function (event) {
@@ -257,7 +257,6 @@
 
         // Store in a variable
         userData = { email, password };
-        console.log(userData.email);
         createNewLogin(userData);
       });
 
@@ -316,14 +315,15 @@
             loginArray[index].email === userData.email &&
             loginArray[index].password === userData.password
           ) {
-            console.log("IT WORKED");
             showSucess();
             hideLogin();
+            loggedIn = true;
             return; // Stop checking further
           }
         }
         // If no match was found, show failed alert
         showFailedAlert();
+        userData = {};
       }
       async function createNewLogin(userData) {
         try {
@@ -384,19 +384,22 @@
         bsCollapse.hide();
       }
       async function addComment(index) {
-        const commentInput = document.getElementById(`commentInput-${index}`);
-        const commentText = commentInput.value.trim();
-        console.log("commentText - " + commentText);
-        if (!commentText) {
-          alert("Please enter a comment before posting.");
+        if (!userData || !loggedIn) {
+          alert("better log in pal");
           return;
         }
-
-        // Construct the new comment object
+        const commentInput = document.getElementById(`commentInput-${index}`);
+        const commentText = commentInput.value.trim();
         const newComment = {
           userEmail: userData.email,
           UserComment: commentText,
         };
+        if (!commentText) {
+          alert("Bros trying to smack talk but forgot to type");
+          return;
+        }
+
+        // Construct the new comment object
 
         try {
           // Fetch the existing stock data
