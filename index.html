@@ -42,18 +42,7 @@
           >
             Signup
           </button>
-          <span class="navbar-toggler-icon">
-            <!-- <button
-              type="button"
-              id=""
-              class="btn btn-primary"
-              data-bs-toggle="collapse"
-              data-bs-target=""
-              aria-controls="navbarSupportedContent"
-              aria-expanded="false"
-              aria-label="Open login modal"
-            ></button> -->
-          </span>
+          <span class="navbar-toggler-icon"> </span>
         </div>
       </nav>
     </header>
@@ -196,7 +185,9 @@
     <!-- Javascript -->
     <script>
       // variables
-      const API_URL = "https://jsonblob.com/api/jsonBlob/1347030011147902976";
+      const API_URL = "https://jsonblob.com/api/jsonBlob/1362033951618818048";
+      const POLYGON_API =
+        "https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2025-04-15/2025-04-15?adjusted=true&sort=asc&limit=120&apiKey=ujZYW74TVWrNPncWiPEsHNnjHFrqELwb";
       const SignupButton = document.getElementById("SignupButton");
       const LoginButton = document.getElementById("LoginButton");
       const LoginSubmit = document.getElementById("LoginSubmit");
@@ -364,7 +355,26 @@
       }
       window.onload = function () {
         fetchData();
+        fetchStockData();
       };
+      async function fetchStockData() {
+        // if (event) event.preventDefault();
+        // console.log("fetch running");
+        try {
+          const response = await fetch(POLYGON_API);
+          const jsonText = await response.text();
+          const textResponse = JSON.parse(jsonText);
+          console.log("response", response);
+          console.log("jsonText", jsonText);
+          console.log("textResponse", textResponse);
+          let stockInfo = textResponse.results[0];
+          console.log("textResponse.results[0]", textResponse.results[0]);
+          console.log("High - ", stockInfo.h)
+          console.log("Low - ", stockInfo.l)
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
       function showSucess() {
         document.getElementById("successAlert").classList.remove("d-none");
       }
