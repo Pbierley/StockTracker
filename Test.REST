@@ -1,9 +1,40 @@
+POST http://localhost:4000/users/signup
+Content-Type: application/json
 
-//  GETS APPLE DAILY DATA
-GET /v2/aggs/ticker/AAPL/range/1/day/2025-04-15/2025-04-15 HTTP/1.1
-Host: api.polygon.io
-Authorization: Bearer ujZYW74TVWrNPncWiPEsHNnjHFrqELwb
+{
+    "email":"walterWhite@gmail.com","password":"crystalBlue123"
+}
+###
+GET http://localhost:4000/stocks/AAPL
+Content-Type: application/json
+
+{
+    "ticker":"AAPL"
+}
+###
+GET http://localhost:4000/stocks/anything
+Content-Type: application/json
+
+{
+    "ticker":"MSFT"
+}
+### GET stock
+GET http://localhost:4000/stocks/anything
+Content-Type: application/json
+
+{
+    "ticker":""
+}
+
+### GET stock
+GET https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=TSLA&apikey=SMPICQ6GQ5HO959X
+Content-Type: application/json
 
 
-//  GETS APPLE DAILY DATA
+### GETS existing user
+POST http://localhost:4000/users/login
+Content-Type: application/json
 
+{
+    "email":"walterWhite@gmail.com","password":"crystalBlue123"
+}
