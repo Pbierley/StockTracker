@@ -78,6 +78,7 @@ const getStock = async (req, res) => {
         { ticker: upperTicker },
         { $set: { tradingData } }
       );
+      console.log("trading data updated from alphaVantage");
       existing.tradingData = tradingData;
     } catch (err) {
       console.warn("AlphaVantage fetch failed (non-blocking):", err.message);

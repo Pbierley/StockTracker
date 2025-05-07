@@ -19,12 +19,16 @@ Content-Type: application/json
     "ticker":"MSFT"
 }
 ### GET stock
-GET http://localhost:4000/stocks/anything
+GET http://localhost:4000/stocks/TSLA
 Content-Type: application/json
 
 {
-    "ticker":""
+    "ticker":"AMZN"
 }
+### GET all stock
+GET http://localhost:4000/stocks/
+Content-Type: application/json
+
 
 ### GET stock
 GET https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=TSLA&apikey=SMPICQ6GQ5HO959X

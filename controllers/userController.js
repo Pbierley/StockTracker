@@ -15,6 +15,10 @@ const findUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
     console.log("user backend result - ", user);
+    const token = jwt.sign(user, process.env.JSON_WEB_KEY, { expiresIn: "1h" });
+    res.cookie("token", token, {
+      httpOnly: true,
+    });
     res.json(user);
   } catch (error) {
     console.error("Error fetching user: ", error);
