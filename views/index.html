@@ -270,8 +270,6 @@
       const POLYGON_API_KEY = "ujZYW74TVWrNPncWiPEsHNnjHFrqELwb";
       const LoginButton = document.getElementById("LoginButton");
       const SignupButton = document.getElementById("SignupButton");
-      const LoginSubmit = document.getElementById("LoginSubmit");
-      const SignupSubmit = document.getElementById("SignupSubmit");
       const LogoutButton = document.getElementById("logoutButton");
 
       function fetchAllStocks() {
@@ -324,6 +322,22 @@
 
         const cardBody = document.createElement("div");
         cardBody.classList.add("card-body");
+
+        const backButton = document.createElement("button");
+        backButton.classList.add(
+          "btn",
+          "btn-secondary",
+          "btn-sm",
+          "position-absolute",
+          "top-0",
+          "end-0",
+          "m-2"
+        );
+        backButton.textContent = "Back";
+        backButton.onclick = () => {
+          stockContainer.innerHTML = "";
+          fetchAllStocks();
+        };
 
         let logoHtml = "";
         if (stock.logo) {
@@ -397,6 +411,7 @@
         cardDiv.appendChild(commentList);
         cardDiv.appendChild(showCommentsButton);
         cardDiv.appendChild(commentsDiv);
+        cardDiv.appendChild(backButton);
 
         stockContainer.appendChild(cardDiv);
 

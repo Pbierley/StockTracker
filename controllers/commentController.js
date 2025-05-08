@@ -27,6 +27,24 @@ const createComment = async (req, res) => {
 
 const deleteComment = async (req, res) => {
   console.log("comment would be deleted here");
+  const { commentId } = req.params;
+  console.log("commentId");
+  try {
+    const db = await connectToDB();
+    const comments = db.collection("comments");
+
+    // Delete the comment from the "comments" collection
+    const result = await comments.deleteOne({ _id: new ObjectId(commentId) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Comment not found." });
+    }
+
+    res.status(200).json({ message: "Comment deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    res.status(500).json({ error: "Failed to delete comment." });
+  }
 };
 const getStockComments = async (req, res) => {
   const ticker = req.params.ticker;
