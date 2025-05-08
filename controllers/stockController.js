@@ -13,6 +13,7 @@ async function fetchPolygonStockMeta(ticker) {
     name: results.name,
     description: results.description,
     market_cap: results.market_cap,
+    logo: results.branding.icon_url,
   };
 }
 
