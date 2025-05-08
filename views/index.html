@@ -137,6 +137,12 @@
             <form>
               <div class="mb-3">
                 <label class="form-label">
+                  Add Username:
+                  <input type="text" id="SignupUsername" class="form-control" />
+                </label>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">
                   Add Email:
                   <input
                     type="text"
@@ -250,6 +256,7 @@
             "Content-Type": "application/json",
           },
           body: JSON.stringify(userData),
+          credentials: "include",
         })
           .then((response) => {
             if (!response.ok) {
@@ -266,6 +273,8 @@
           })
           .then((data) => {
             console.log("User Data:", data);
+            setCookie("username", data.username, 1);
+            console.log("getCookie", getCookie("username"));
           })
           .catch((error) => console.error("Error:", error));
       }
@@ -273,11 +282,13 @@
       function Signup() {
         event.preventDefault();
         const emailInput = document.getElementById("SignupEmail");
+        const usernameInput = document.getElementById("SignupUsername");
         const passwordInput = document.getElementById("SignupPassword");
         const email = emailInput.value;
+        const username = usernameInput.value;
         const password = passwordInput.value;
 
-        userData = { email, password };
+        userData = { email, username, password };
 
         console.log(
           "front end userData submitted JSON PARSE- ",
@@ -292,9 +303,11 @@
         })
           .then((response) => {
             if (response.ok) {
+              fetchAllStocks();
               showSucess();
               hideSignup();
               emailInput.value = "";
+              username.value = "";
               passwordInput.value = "";
               return response.json();
             }
@@ -321,10 +334,10 @@
               <h5 class="card-title">Market Cap : ${stock.market_cap}</h5>
             </div>
             <ul id="commentList-${stock.ticker}" class="list-group list-group-flush"></ul>
-            <button class="btn btn-primary btn-sm mt-2" onclick="showComments('${stock.ticker}-comments')">Show Comments</button>
+            <button class="btn btn-primary btn-sm mt-2" onclick="showComments('${stock.ticker}')">Show Comments</button>
             <div class="card-footer d-none" id="${stock.ticker}-comments">
                 <input type="text" id="commentInput-${stock.ticker}" class="form-control" placeholder="Add a comment">
-                <button class="btn btn-primary btn-sm mt-2" onclick="addComment()">Post Comment</button>
+                <button class="btn btn-primary btn-sm mt-2" onclick="addComment('${stock.ticker}')">Post Comment</button>
             </div>
           </div>
         `;
@@ -368,13 +381,100 @@
           alert.classList.add("d-none");
         }, 3000);
       }
-      function addComment() {
-        console.log("Create Comment called");
+      function addComment(ticker) {
+        const commentElement = document.getElementById(
+          `commentInput-${ticker}`
+        );
+        if (!commentElement) {
+          console.error(`Comment input not found for ticker: ${ticker}`);
+          return;
+        }
+        if (!commentElement.value.trim()) {
+          alert("Comment cannot be empty.");
+          return;
+        }
+        const body = {
+          ticker: ticker,
+          username: getCookie("username"),
+          comment: commentElement.value,
+        };
+        fetch(`${url}/comments/create`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(body),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              showFailedAlert();
+              throw new Error("Must be logged in");
+            } else {
+              commentElement.value = "";
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("data - ", data);
+          })
+          .catch((error) => console.error("Error:", error));
       }
-      function showComments(divName) {
+      function showComments(ticker) {
+        const divName = ticker + "-comments";
         console.log("show Comment called");
         console.log("divName ", divName);
-        document.querySelector(divName).classList.remove("d-none");
+        document.querySelector(`#${divName}`).classList.remove("d-none");
+        fetch(`${url}/comments/${ticker}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.comments && data.comments.length > 0) {
+              // Get the comment list element for this stock
+              console.log("DATA HERE -", data);
+              const commentList = document.getElementById(
+                `commentList-${ticker}`
+              );
+
+              // Clear any existing comments
+              commentList.innerHTML = "";
+
+              // Add each comment as a list item
+              data.comments.forEach((comment) => {
+                const commentItem = document.createElement("li");
+                commentItem.classList.add("list-group-item");
+                commentItem.textContent = `${comment.username}: ${comment.comment}`;
+                commentList.appendChild(commentItem);
+              });
+
+              // Show the comments section
+              document
+                .getElementById(`${ticker}-comments`)
+                .classList.remove("d-none");
+            } else {
+              console.log("No comments found for this stock");
+            }
+          })
+          .catch((error) => console.error("Error fetching comments:", error));
+      }
+      function setCookie(name, value, daysToLive) {
+        const date = new Date();
+        date.setTime(date.getTime() + daysToLive * 24 * 60 * 60 * 1000);
+        let expires = "expires=" + date.toUTCString();
+        document.cookie = `${name}=${value}; ${expires}; path=/`;
+      }
+      function deleteCookie(name) {
+        setCookie(name, null, null);
+      }
+      function getCookie(name) {
+        const cDecoded = decodeURIComponent(document.cookie);
+        const cArray = cDecoded.split("; ");
+        let result = null;
+        cArray.forEach((element) => {
+          if (element.indexOf(name) == 0) {
+            result = element.substring(name.length + 1);
+          }
+        });
+        return result;
       }
     </script>
   </body>

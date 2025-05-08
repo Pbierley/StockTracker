@@ -10,16 +10,28 @@ const loginUser = async (req, res) => {
     const users = db.collection("users");
     //  insure that the password match
     const user = await users.findOne({ email, password }); // directly in query
+    console.log("user - ", user);
 
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
+    const username = user.username;
     console.log("user backend result - ", user);
-    const token = jwt.sign({ email, password }, process.env.JSON_WEB_KEY, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { email, username, password },
+      process.env.JSON_WEB_KEY,
+      {
+        expiresIn: "1h",
+      }
+    );
     res.cookie("token", token, {
       httpOnly: true,
+      secure: true, // Only send over HTTPS
+      sameSite: "None", // Ensure it works across domains
+      maxAge: 3600000, // 1 hour
+    });
+    res.cookie("username", user.username, {
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
     res.json(user);
   } catch (error) {
@@ -29,10 +41,12 @@ const loginUser = async (req, res) => {
 };
 
 const signupUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
+  console.log(req.body);
   const token = jwt.sign(
     {
       email,
+      username,
       password,
     },
     secretKey,
@@ -41,19 +55,32 @@ const signupUser = async (req, res) => {
 
   console.log(token);
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password required" });
+  if (!email || !password || !username) {
+    return res
+      .status(400)
+      .json({ error: "Email, Username and password required" });
   }
   try {
     const db = await connectToDB();
     const users = db.collection("users");
-    const existing = await users.findOne({ email });
-    if (existing) {
-      return res.status(409).json({ error: "User already exists" });
+    const emailExisting = await users.findOne({ email });
+    const usernameExisting = await users.findOne({ username });
+    if (emailExisting) {
+      return res.status(409).json({ error: "email already exists" });
     }
-    const result = await users.insertOne({ email, password });
+    if (usernameExisting) {
+      return res.status(409).json({ error: "email already exists" });
+    }
+    const result = await users.insertOne({ email, username, password });
     res.cookie("token", token, {
       httpOnly: true,
+      sameSite: "Lax", // or 'None' if cross-origin with HTTPS
+      secure: false, // true only if using HTTPS
+      maxAge: 1000 * 60 * 60, // 1 hour
+    });
+    res.cookie("username", username, {
+      secure: false, // true on HTTPS
+      sameSite: "Lax", // or "Strict"
     });
     res
       .status(201)
