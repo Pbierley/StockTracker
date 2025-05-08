@@ -75,12 +75,16 @@ const getStock = async (req, res) => {
     // Optionally update with AlphaVantage trading data
     try {
       const tradingData = await fetchAlphaVantageQuote(upperTicker);
-      await stocks.updateOne(
-        { ticker: upperTicker },
-        { $set: { tradingData } }
-      );
-      console.log("trading data updated from alphaVantage");
-      existing.tradingData = tradingData;
+      console.log("tradingData from alphaVantage", tradingData);
+      //  check to prevent null from alphaVantage
+      if (tradingData) {
+        await stocks.updateOne(
+          { ticker: upperTicker },
+          { $set: { tradingData } }
+        );
+        console.log("trading data updated from alphaVantage");
+        existing.tradingData = tradingData;
+      }
     } catch (err) {
       console.warn("AlphaVantage fetch failed (non-blocking):", err.message);
     }

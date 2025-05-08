@@ -11,6 +11,6 @@ const { authToken } = require("../middleware/authToken");
 //  imports
 router.post("/create", authToken, createComment);
 router.post("/delete", authToken, deleteComment);
-router.get("/:ticker", getStockComments);
+router.get("/:ticker", authToken, getStockComments);
 
 module.exports = router;
