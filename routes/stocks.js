@@ -5,7 +5,7 @@ const router = express.Router();
 //  imports
 const { getStockPrices, getStock } = require("../controllers/stockController");
 
-router.get("/", getStockPrices);
+router.get("/all", getStockPrices);
 router.post("/:ticker", getStock);
 //  router.get("/:ticker", getStock);
 

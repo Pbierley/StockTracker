@@ -2,7 +2,7 @@ const { connectToDB } = require("../db/mongoClient"); // or wherever your DB cod
 const jwt = require("jsonwebtoken");
 const secretKey = process.env.JSON_WEB_KEY;
 
-const findUser = async (req, res) => {
+const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -15,7 +15,9 @@ const findUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
     console.log("user backend result - ", user);
-    const token = jwt.sign(user, process.env.JSON_WEB_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ email, password }, process.env.JSON_WEB_KEY, {
+      expiresIn: "1h",
+    });
     res.cookie("token", token, {
       httpOnly: true,
     });
@@ -34,7 +36,7 @@ const signupUser = async (req, res) => {
       password,
     },
     secretKey,
-    { expiresIn: "24h" }
+    { expiresIn: "1h" }
   );
 
   console.log(token);
@@ -49,7 +51,10 @@ const signupUser = async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: "User already exists" });
     }
-    const result = await users.insertOne({ email, password, token });
+    const result = await users.insertOne({ email, password });
+    res.cookie("token", token, {
+      httpOnly: true,
+    });
     res
       .status(201)
       .json({ message: "User created", userId: result.insertedId });
@@ -59,4 +64,4 @@ const signupUser = async (req, res) => {
   }
 };
 
-module.exports = { findUser, signupUser };
+module.exports = { loginUser, signupUser };

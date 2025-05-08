@@ -1,0 +1,14 @@
+// express
+const express = require("express");
+const router = express.Router();
+const {
+  createComment,
+  deleteComment,
+} = require("../controllers/commentController");
+const { authToken } = require("../middleware/authToken");
+
+//  imports
+router.post("/create", authToken, createComment);
+router.post("/delete", authToken, deleteComment);
+
+module.exports = router;

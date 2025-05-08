@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-exports.cookieJWTAuth = (req, res, next) => {
+const authToken = (req, res, next) => {
   const token = req.cookies.token;
   try {
     const user = jwt.verify(token, process.env.JSON_WEB_KEY);
@@ -9,6 +9,8 @@ exports.cookieJWTAuth = (req, res, next) => {
   } catch {
     res.clearCookie("token");
     console.log("Cookie monster ate ur cookies");
-    //  i need to create return here that Prompts the user to log in agian
+    res.status(401).json({ message: "Session expired. Please log in again." });
   }
 };
+
+module.exports = { authToken };
