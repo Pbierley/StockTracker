@@ -52,6 +52,13 @@
             StockTracker
           </a>
           <div class="d-flex ms-auto"></div>
+
+          <input
+            type="text"
+            id="tickerInput"
+            placeholder="Enter stock ticker"
+          />
+          <button onclick="fetchStock()">Get Price</button>
           <button
             type="button"
             id="LoginButton"
@@ -65,12 +72,6 @@
           >
             Login
           </button>
-          <input
-            type="text"
-            id="tickerInput"
-            placeholder="Enter stock ticker"
-          />
-          <button onclick="fetchStock()">Get Price</button>
           <button
             type="button"
             id="SignupButton"
@@ -84,7 +85,17 @@
           >
             Signup
           </button>
-          <span class="navbar-toggler-icon"> </span>
+          <button
+            type="button"
+            id="logoutButton"
+            class="btn btn-primary show d-none"
+            data-bs-toggle="collapse"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            onclick="logout()"
+          >
+            Logout
+          </button>
         </div>
       </nav>
     </header>
@@ -261,9 +272,13 @@
       const SignupButton = document.getElementById("SignupButton");
       const LoginSubmit = document.getElementById("LoginSubmit");
       const SignupSubmit = document.getElementById("SignupSubmit");
+      const LogoutButton = document.getElementById("logoutButton");
 
       function fetchAllStocks() {
-        fetch(`${url}/stocks/all`) // make sure this matches your Express route
+        fetch(`${url}/stocks/all`, {
+          method: "GET",
+          credentials: "include", // Include cookies with the request
+        })
           .then((response) => response.json())
           .then((data) => {
             console.log("Stock Data:", data);
@@ -423,9 +438,27 @@
             console.log("User Data:", data);
             deleteCookies();
             setCookie("username", data.username, 15); //  sets cookie to last for 15 mins
+            LoginButton.classList.add("d-none");
+            SignupButton.classList.add("d-none");
+            LogoutButton.classList.remove("d-none");
             console.log("getCookie", getCookie("username"));
           })
           .catch((error) => console.error("Error:", error));
+      }
+      function logout() {
+        fetch(`${url}/users/logout`, {
+          method: "POST",
+          credentials: "include",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data.message); // "Cookies cleared"
+          });
+        deleteCookies();
+        stockContainer.innerHTML = "";
+        LogoutButton.classList.add("d-none");
+        LoginButton.classList.remove("d-none");
+        SignupButton.classList.remove("d-none");
       }
       //  SIGNUP REQUEST
       function Signup() {
@@ -681,7 +714,7 @@
         document.cookie.split(";").forEach((cookie) => {
           const eqPos = cookie.indexOf("=");
           const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
-          document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
         });
       }
       function getCookie(name) {

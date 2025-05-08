@@ -39,7 +39,27 @@ const loginUser = async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve user data." });
   }
 };
+const clearCookies = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      path: "/", // important to match the original cookie
+    });
 
+    res.clearCookie("username", {
+      secure: true,
+      sameSite: "None",
+      path: "/", // also make sure the path matches
+    });
+
+    return res.status(200).json({ message: "Cookies cleared" });
+  } catch (err) {
+    console.error("Error clearing cookies:", err);
+    return res.status(500).json({ error: "Failed to clear cookies." });
+  }
+};
 const signupUser = async (req, res) => {
   const { email, username, password } = req.body;
   console.log(req.body);
@@ -95,4 +115,4 @@ const signupUser = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, signupUser };
+module.exports = { loginUser, signupUser, clearCookies };

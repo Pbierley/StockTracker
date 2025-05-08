@@ -1,6 +1,9 @@
 const chartInstances = {}; // Global storage
 
 function showChart(ticker, tradingData) {
+  if (!tradingData) {
+    return;
+  }
   const canvas = document.getElementById(`${ticker}-chart`);
   if (!canvas) {
     console.warn(`Canvas element not found for ticker: ${ticker}`);

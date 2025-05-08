@@ -6,7 +6,7 @@ const { authToken } = require("../middleware/authToken");
 //  imports
 const { getStockPrices, getStock } = require("../controllers/stockController");
 
-router.get("/all", getStockPrices);
+router.get("/all", authToken, getStockPrices);
 router.post("/:ticker", authToken, getStock);
 
 module.exports = router;

@@ -19,9 +19,11 @@ async function fetchPolygonStockMeta(ticker) {
 
 // Utility: Fetch stock trading data from AlphaVantage
 async function fetchAlphaVantageQuote(ticker) {
-  const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
-  const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker}&apikey=${apiKey}`;
+  const ApiKey = process.env.A_KEY;
+  console.log("api key -", ApiKey);
+  const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker}&apikey=${ApiKey}`;
   const response = await axios.get(url);
+  console.log("fetchAlphaVantageQuote response", response);
   return response.data["Time Series (Daily)"];
 }
 
@@ -77,7 +79,7 @@ const getStock = async (req, res) => {
       const tradingData = await fetchAlphaVantageQuote(upperTicker);
       console.log("tradingData from alphaVantage", tradingData);
       //  check to prevent null from alphaVantage
-      if (tradingData) {
+      if (tradingData !== null || tradingData == !undefined) {
         await stocks.updateOne(
           { ticker: upperTicker },
           { $set: { tradingData } }

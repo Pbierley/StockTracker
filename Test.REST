@@ -12,18 +12,15 @@ Content-Type: application/json
     "ticker":"AAPL"
 }
 ###
-GET http://localhost:4000/stocks/anything
+GET https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey=681d260bf43948c09aa6284b`;
 Content-Type: application/json
 
-{
-    "ticker":"MSFT"
-}
 ### GET stock
-GET http://localhost:4000/stocks/TSLA
+GET http://localhost:4000/stocks/AAPL
 Content-Type: application/json
 
 {
-    "ticker":"AMZN"
+    "ticker":"AAPL"
 }
 ### GET all stock
 GET http://localhost:4000/stocks/
