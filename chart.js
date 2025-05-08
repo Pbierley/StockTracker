@@ -1,57 +1,65 @@
-// chart.js
+const chartInstances = {}; // Global object to store chart instances
 
-function showChart(ticker, priceData) {
-  const ctx = document.getElementById(`${ticker}-chart`);
+function showChart(ticker, tradingData) {
+  // Convert object to array and sort by date
+  const entries = Object.entries(tradingData).sort(
+    ([dateA], [dateB]) => new Date(dateA) - new Date(dateB)
+  );
 
-  const dates = Object.keys(priceData).sort(); // Ensure chronological order
+  const labels = entries.map(([date]) => date);
+  const closePrices = entries.map(([_, data]) => parseFloat(data["4. close"]));
 
-  const candleData = dates.map((date) => {
-    const day = priceData[date];
-    return {
-      x: date,
-      o: parseFloat(day["1. open"]),
-      h: parseFloat(day["2. high"]),
-      l: parseFloat(day["3. low"]),
-      c: parseFloat(day["4. close"]),
-    };
-  });
-
-  new Chart(ctx, {
-    type: "candlestick",
-    data: {
-      datasets: [
-        {
-          label: `${ticker} Stock Data`,
-          data: candleData,
+  // Create new Chart instance if it doesn't exist
+  if (!chartInstances[ticker]) {
+    chartInstances[ticker] = new Chart(
+      document.getElementById(`${ticker}-chart`).getContext("2d"),
+      {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: `${ticker} Closing Price`,
+              data: closePrices,
+              borderColor: "rgba(75, 192, 192, 1)",
+              backgroundColor: "rgba(75, 192, 192, 0.2)",
+              borderWidth: 2,
+              tension: 0.2,
+              fill: true,
+              pointRadius: 0,
+            },
+          ],
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: `${ticker} Candlestick Chart`,
-        },
-      },
-      scales: {
-        x: {
-          type: "timeseries",
-          time: {
-            unit: "day",
-            tooltipFormat: "MMM dd",
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              mode: "index",
+              intersect: false,
+            },
           },
-          ticks: {
-            source: "auto",
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: "Date",
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: "Price (USD)",
+              },
+              beginAtZero: false,
+            },
           },
         },
-        y: {
-          title: {
-            display: true,
-            text: "Price (USD)",
-          },
-        },
-      },
-    },
-  });
+      }
+    );
+  } else {
+    console.log(`Chart for ${ticker} already exists`);
+  }
 }

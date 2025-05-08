@@ -36,7 +36,7 @@
             id="tickerInput"
             placeholder="Enter stock ticker (e.g. AAPL)"
           />
-          <button onclick="fetchStocks()">Get Price</button>
+          <button onclick="fetchStock()">Get Price</button>
           <p id="priceDisplay"></p>
           <button
             type="button"
@@ -210,9 +210,17 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+    <!-- Chart.js core library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chart.js Financial Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@3.3.0/dist/chartjs-chart-financial.min.js"></script>
+
+    <!-- Chart.js date adapter (for timeseries axis) -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+    <!-- Your custom chart logic -->
+    <script src="../chart.js" defer></script>
     <script>
       const url = "http://localhost:4000";
       const POLYGON_API_KEY = "ujZYW74TVWrNPncWiPEsHNnjHFrqELwb";
@@ -230,7 +238,7 @@
           })
           .catch((error) => console.error("Error:", error));
       }
-      function fetchStocks() {
+      function fetchStock() {
         const ticker = document.getElementById("tickerInput").value;
         fetch(`${url}/stocks/${ticker}`, {
           method: "POST",
@@ -326,41 +334,95 @@
           .catch((error) => console.error("Error:", error));
       }
       function displayStocks(data) {
-        //  <img  class="rounded float-start w-25" src=${arr[index].logoUrl} alt="${arr[index].name} logo">
-
         data.forEach((stock) => {
-          stockContainer.innerHTML += `
-          <div class="card" id="card-${stock.ticker}">
-            <div class="card-body">
-              ${
-                stock.logo
-                  ? `<img src="${stock.logo}?apiKey=${POLYGON_API_KEY}" alt="${stock.name} logo" class="img-fluid mb-2" style="max-width: 100px;">`
-                  : ""
-              }
-              <h5 class="card-title">Ticker : ${stock.ticker}</h5>
-              <h5 class="card-title">Name : ${stock.name}</h5>
-              <h5 class="card-title">Description : ${stock.description}</h5>
-              <h5 class="card-title">Market Cap : ${stock.market_cap}</h5>
-              <div id="${stock.ticker}-chart-div">
-                <canvas id="${stock.ticker}-chart"></canvas>
-              </div>
-            </div>
-            <ul id="commentList-${
-              stock.ticker
-            }" class="list-group list-group-flush"></ul>
-            <button class="btn btn-primary btn-sm mt-2" onclick="showComments('${
-              stock.ticker
-            }')">Show Comments</button>
-            <div class="card-footer d-none" id="${stock.ticker}-comments">
-                <input type="text" id="commentInput-${
-                  stock.ticker
-                }" class="form-control" placeholder="Add a comment">
-                <button class="btn btn-primary btn-sm mt-2" onclick="addComment('${
-                  stock.ticker
-                }')">Post Comment</button>
-            </div>
-          </div>
-        `;
+          const cardDiv = document.createElement("div");
+          cardDiv.classList.add("card");
+          cardDiv.id = `card-${stock.ticker}`;
+
+          const cardBody = document.createElement("div");
+          cardBody.classList.add("card-body");
+
+          let logoHtml = "";
+          if (stock.logo) {
+            logoHtml = `<img src="${stock.logo}?apiKey=${POLYGON_API_KEY}" alt="${stock.name} logo" class="img-fluid mb-2" style="max-width: 100px;">`;
+          }
+
+          const titleTicker = document.createElement("h5");
+          titleTicker.classList.add("card-title");
+          titleTicker.textContent = `Ticker : ${stock.ticker}`;
+
+          const titleName = document.createElement("h5");
+          titleName.classList.add("card-title");
+          titleName.textContent = `Name : ${stock.name}`;
+
+          const titleDescription = document.createElement("h5");
+          titleDescription.classList.add("card-title");
+          titleDescription.textContent = `Description : ${stock.description}`;
+
+          const titleMarketCap = document.createElement("h5");
+          titleMarketCap.classList.add("card-title");
+          titleMarketCap.textContent = `Market Cap : ${stock.market_cap}`;
+
+          const chartDiv = document.createElement("div");
+          chartDiv.id = `${stock.ticker}-chart-div`;
+
+          const canvas = document.createElement("canvas");
+          canvas.id = `${stock.ticker}-chart`;
+
+          chartDiv.appendChild(canvas);
+
+          cardBody.innerHTML += logoHtml;
+          cardBody.appendChild(titleTicker);
+          cardBody.appendChild(titleName);
+          cardBody.appendChild(titleDescription);
+          cardBody.appendChild(titleMarketCap);
+          cardBody.appendChild(chartDiv);
+
+          const commentList = document.createElement("ul");
+          commentList.id = `commentList-${stock.ticker}`;
+          commentList.classList.add("list-group", "list-group-flush");
+
+          const showCommentsButton = document.createElement("button");
+          showCommentsButton.classList.add(
+            "btn",
+            "btn-primary",
+            "btn-sm",
+            "mt-2"
+          );
+          showCommentsButton.textContent = "Show Comments";
+          showCommentsButton.onclick = () => showComments(stock.ticker);
+
+          const commentsDiv = document.createElement("div");
+          commentsDiv.classList.add("card-footer", "d-none");
+          commentsDiv.id = `${stock.ticker}-comments`;
+
+          const commentInput = document.createElement("input");
+          commentInput.type = "text";
+          commentInput.id = `commentInput-${stock.ticker}`;
+          commentInput.classList.add("form-control");
+          commentInput.placeholder = "Add a comment";
+
+          const postCommentButton = document.createElement("button");
+          postCommentButton.classList.add(
+            "btn",
+            "btn-primary",
+            "btn-sm",
+            "mt-2"
+          );
+          postCommentButton.textContent = "Post Comment";
+          postCommentButton.onclick = () => addComment(stock.ticker);
+
+          commentsDiv.appendChild(commentInput);
+          commentsDiv.appendChild(postCommentButton);
+
+          cardDiv.appendChild(cardBody);
+          cardDiv.appendChild(commentList);
+          cardDiv.appendChild(showCommentsButton);
+          cardDiv.appendChild(commentsDiv);
+
+          stockContainer.appendChild(cardDiv);
+
+          // Now that the canvas element is definitely in the DOM, call showChart
           showChart(stock.ticker, stock.tradingData);
         });
       }
@@ -423,6 +485,7 @@
               throw new Error("Must be logged in");
             } else {
               commentElement.value = "";
+              showComments(ticker);
             }
             return response.json();
           })
@@ -431,62 +494,6 @@
           })
           .catch((error) => console.error("Error:", error));
       }
-      function showChart(ticker, priceData) {
-        const ctx = document.getElementById(`${ticker}-chart`);
-
-        const dates = Object.keys(priceData).sort(); // Ensure chronological order
-
-        const candleData = dates.map((date) => {
-          const day = priceData[date];
-          return {
-            x: date,
-            o: parseFloat(day["1. open"]),
-            h: parseFloat(day["2. high"]),
-            l: parseFloat(day["3. low"]),
-            c: parseFloat(day["4. close"]),
-          };
-        });
-
-        new Chart(ctx, {
-          type: "candlestick",
-          data: {
-            datasets: [
-              {
-                label: `${ticker} Stock Data`,
-                data: candleData,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              title: {
-                display: true,
-                text: `${ticker} Candlestick Chart`,
-              },
-            },
-            scales: {
-              x: {
-                type: "timeseries",
-                time: {
-                  unit: "day",
-                  tooltipFormat: "MMM dd",
-                },
-                ticks: {
-                  source: "auto",
-                },
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: "Price (USD)",
-                },
-              },
-            },
-          },
-        });
-      }
-
       function showComments(ticker) {
         const divName = ticker + "-comments";
         console.log("show Comment called");
