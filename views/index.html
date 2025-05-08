@@ -111,7 +111,12 @@
                   />
                 </label>
               </div>
-              <button type="submit" class="btn btn-success" id="LoginSubmit">
+              <button
+                type="submit"
+                class="btn btn-success"
+                id="LoginSubmit"
+                onclick="Login()"
+              >
                 Submit
               </button>
               <button
@@ -153,7 +158,12 @@
                 </label>
               </div>
 
-              <button id="SignupSubmit" type="submit" class="btn btn-success">
+              <button
+                id="SignupSubmit"
+                type="submit"
+                class="btn btn-success"
+                onclick="Signup()"
+              >
                 Submit
               </button>
               <button
@@ -226,11 +236,12 @@
           .catch((error) => console.error("Error:", error));
       }
       //  LOGIN REQUEST
-      LoginSubmit.addEventListener("click", function (event) {
+      function Login() {
         event.preventDefault();
-        const email = document.getElementById("LoginEmail").value;
-        const password = document.getElementById("LoginPassword").value;
-
+        const emailInput = document.getElementById("LoginEmail");
+        const passwordInput = document.getElementById("LoginPassword");
+        const email = emailInput.value;
+        const password = passwordInput.value;
         userData = { email, password };
         console.log("front end - body", JSON.stringify(userData));
         fetch(`${url}/users/login`, {
@@ -248,6 +259,8 @@
               fetchAllStocks();
               showSucess();
               hideLogin();
+              emailInput.value = "";
+              passwordInput.value = "";
             }
             return response.json();
           })
@@ -255,7 +268,46 @@
             console.log("User Data:", data);
           })
           .catch((error) => console.error("Error:", error));
-      });
+      }
+      //  SIGNUP REQUEST
+      function Signup() {
+        event.preventDefault();
+        const emailInput = document.getElementById("SignupEmail");
+        const passwordInput = document.getElementById("SignupPassword");
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        userData = { email, password };
+
+        console.log(
+          "front end userData submitted JSON PARSE- ",
+          JSON.stringify(userData)
+        );
+        fetch(`${url}/users/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        })
+          .then((response) => {
+            if (response.ok) {
+              showSucess();
+              hideSignup();
+              emailInput.value = "";
+              passwordInput.value = "";
+              return response.json();
+            }
+            showFailedAlert();
+            throw new Error("Signup failed");
+          })
+          .then((data) => {
+            console.log("Signup successful:", data);
+
+            //  wherever you want to redirect
+          })
+          .catch((error) => console.error("Error:", error));
+      }
       function displayStocks(data) {
         //  <img  class="rounded float-start w-25" src=${arr[index].logoUrl} alt="${arr[index].name} logo">
 
@@ -269,9 +321,10 @@
               <h5 class="card-title">Market Cap : ${stock.market_cap}</h5>
             </div>
             <ul id="commentList-${stock.ticker}" class="list-group list-group-flush"></ul>
-            <div class="card-footer">
-              <input type="text" id="commentInput-${stock.ticker}" class="form-control" placeholder="Add a comment">
-              <button class="btn btn-primary btn-sm mt-2" onclick="addComment()">Post Comment</button>
+            <button class="btn btn-primary btn-sm mt-2" onclick="showComments('${stock.ticker}-comments')">Show Comments</button>
+            <div class="card-footer d-none" id="${stock.ticker}-comments">
+                <input type="text" id="commentInput-${stock.ticker}" class="form-control" placeholder="Add a comment">
+                <button class="btn btn-primary btn-sm mt-2" onclick="addComment()">Post Comment</button>
             </div>
           </div>
         `;
@@ -315,41 +368,14 @@
           alert.classList.add("d-none");
         }, 3000);
       }
-      //  SIGNUP REQUEST
-      SignupSubmit.addEventListener("click", function (event) {
-        event.preventDefault();
-        const email = document.getElementById("SignupEmail").value;
-        const password = document.getElementById("SignupPassword").value;
-
-        userData = { email, password };
-
-        console.log(
-          "front end userData submitted JSON PARSE- ",
-          JSON.stringify(userData)
-        );
-        fetch(`${url}/users/signup`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        })
-          .then((response) => {
-            if (response.ok) {
-              showSucess();
-              hideSignup();
-              return response.json();
-            }
-            showFailedAlert();
-            throw new Error("Signup failed");
-          })
-          .then((data) => {
-            console.log("Signup successful:", data);
-
-            //  wherever you want to redirect
-          })
-          .catch((error) => console.error("Error:", error));
-      });
+      function addComment() {
+        console.log("Create Comment called");
+      }
+      function showComments(divName) {
+        console.log("show Comment called");
+        console.log("divName ", divName);
+        document.querySelector(divName).classList.remove("d-none");
+      }
     </script>
   </body>
 </html>
