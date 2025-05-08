@@ -683,9 +683,7 @@
       }
       function showComments(ticker) {
         const divName = `${ticker}-comments`;
-        const username = getCookie("username"); // assumes you store username in a cookie
-        console.log("show Comment called");
-        console.log("divName ", divName);
+        const username = getCookie("username");
         document.querySelector(`#${divName}`).classList.remove("d-none");
 
         fetch(`${url}/comments/${ticker}`, {
@@ -708,11 +706,24 @@
                   "align-items-center"
                 );
 
+                const contentDiv = document.createElement("div");
+                contentDiv.classList.add("flex-grow-1");
+
                 const commentText = document.createElement("span");
                 commentText.textContent = `${comment.username}: ${comment.comment}`;
-                commentItem.appendChild(commentText);
+                contentDiv.appendChild(commentText);
+
+                commentItem.appendChild(contentDiv);
 
                 if (comment.username === username) {
+                  const buttonGroup = document.createElement("div");
+
+                  // Edit Button
+                  const editBtn = document.createElement("button");
+                  editBtn.textContent = "Edit";
+                  editBtn.classList.add("btn", "btn-warning", "btn-sm", "ms-2");
+
+                  // Delete Button
                   const deleteBtn = document.createElement("button");
                   deleteBtn.textContent = "X";
                   deleteBtn.classList.add(
@@ -721,11 +732,61 @@
                     "btn-sm",
                     "ms-2"
                   );
+
+                  // Edit action
+                  editBtn.onclick = () => {
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.value = comment.comment;
+                    input.classList.add("form-control", "me-2");
+
+                    const saveBtn = document.createElement("button");
+                    saveBtn.textContent = "Save";
+                    saveBtn.classList.add(
+                      "btn",
+                      "btn-success",
+                      "btn-sm",
+                      "me-2"
+                    );
+
+                    const cancelBtn = document.createElement("button");
+                    cancelBtn.textContent = "Cancel";
+                    cancelBtn.classList.add("btn", "btn-secondary", "btn-sm");
+
+                    contentDiv.innerHTML = "";
+                    contentDiv.appendChild(input);
+                    contentDiv.appendChild(saveBtn);
+                    contentDiv.appendChild(cancelBtn);
+
+                    saveBtn.onclick = () => {
+                      const newComment = input.value.trim();
+                      if (newComment) {
+                        fetch(`${url}/comments/comment/${comment._id}`, {
+                          method: "PATCH",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          credentials: "include",
+                          body: JSON.stringify({ updatedComment: newComment }),
+                        })
+                          .then((res) => res.json())
+                          .then(() => showComments(ticker))
+                          .catch((err) => console.error("Edit failed", err));
+                      }
+                    };
+
+                    cancelBtn.onclick = () => showComments(ticker);
+                  };
+
+                  // Delete action
                   deleteBtn.onclick = async () => {
                     await deleteComment(comment._id);
-                    showComments(ticker); // Refresh after delete
+                    showComments(ticker);
                   };
-                  commentItem.appendChild(deleteBtn);
+
+                  buttonGroup.appendChild(editBtn);
+                  buttonGroup.appendChild(deleteBtn);
+                  commentItem.appendChild(buttonGroup);
                 }
 
                 commentList.appendChild(commentItem);
@@ -740,6 +801,7 @@
           })
           .catch((error) => console.error("Error fetching comments:", error));
       }
+
       async function deleteComment(commentId) {
         try {
           const response = await fetch(`${url}/comments/comment/${commentId}`, {

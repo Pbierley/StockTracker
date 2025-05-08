@@ -25,6 +25,38 @@ const createComment = async (req, res) => {
     res.status(500).json({ error: "Failed to post comment." });
   }
 };
+const editComment = async (req, res) => {
+  const { commentId } = req.params;
+  const { updatedComment } = req.body;
+
+  // Ensure you have the username from your auth middleware (e.g., decoded JWT)
+  const username = req.user?.username;
+
+  if (!updatedComment || !username) {
+    return res.status(400).json({ error: "Invalid data." });
+  }
+
+  try {
+    const db = await connectToDB();
+    const comments = db.collection("comments");
+
+    const result = await comments.updateOne(
+      { _id: new ObjectId(commentId), username: username },
+      { $set: { comment: updatedComment } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res
+        .status(404)
+        .json({ error: "Comment not found or not owned by user." });
+    }
+
+    return res.status(200).json({ message: "Comment updated successfully." });
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    return res.status(500).json({ error: "Failed to update comment." });
+  }
+};
 
 const deleteComment = async (req, res) => {
   const { commentId } = req.params;
@@ -73,4 +105,9 @@ const getStockComments = async (req, res) => {
   }
 };
 
-module.exports = { createComment, deleteComment, getStockComments };
+module.exports = {
+  createComment,
+  deleteComment,
+  getStockComments,
+  editComment,
+};
