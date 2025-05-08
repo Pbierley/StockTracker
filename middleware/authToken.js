@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const webkey = process.env.JSON_WEB_KEY;
 
 const authToken = (req, res, next) => {
+  console.log("webkey", webkey);
   console.log("Cookies received:", req.cookies);
   const token = req.cookies.token;
   if (!token) {
