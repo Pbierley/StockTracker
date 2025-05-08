@@ -682,34 +682,55 @@
           .catch((error) => console.error("Error:", error));
       }
       function showComments(ticker) {
-        const divName = ticker + "-comments";
+        const divName = `${ticker}-comments`;
+        const username = getCookie("username"); // assumes you store username in a cookie
         console.log("show Comment called");
         console.log("divName ", divName);
         document.querySelector(`#${divName}`).classList.remove("d-none");
+
         fetch(`${url}/comments/${ticker}`, {
           credentials: "include",
         })
           .then((response) => response.json())
           .then((data) => {
             if (data.comments && data.comments.length > 0) {
-              // Get the comment list element for this stock
-              console.log("DATA HERE -", data);
               const commentList = document.getElementById(
                 `commentList-${ticker}`
               );
-
-              // Clear any existing comments
               commentList.innerHTML = "";
 
-              // Add each comment as a list item
               data.comments.forEach((comment) => {
                 const commentItem = document.createElement("li");
-                commentItem.classList.add("list-group-item");
-                commentItem.textContent = `${comment.username}: ${comment.comment}`;
+                commentItem.classList.add(
+                  "list-group-item",
+                  "d-flex",
+                  "justify-content-between",
+                  "align-items-center"
+                );
+
+                const commentText = document.createElement("span");
+                commentText.textContent = `${comment.username}: ${comment.comment}`;
+                commentItem.appendChild(commentText);
+
+                if (comment.username === username) {
+                  const deleteBtn = document.createElement("button");
+                  deleteBtn.textContent = "X";
+                  deleteBtn.classList.add(
+                    "btn",
+                    "btn-danger",
+                    "btn-sm",
+                    "ms-2"
+                  );
+                  deleteBtn.onclick = async () => {
+                    await deleteComment(comment._id);
+                    showComments(ticker); // Refresh after delete
+                  };
+                  commentItem.appendChild(deleteBtn);
+                }
+
                 commentList.appendChild(commentItem);
               });
 
-              // Show the comments section
               document
                 .getElementById(`${ticker}-comments`)
                 .classList.remove("d-none");
@@ -719,6 +740,20 @@
           })
           .catch((error) => console.error("Error fetching comments:", error));
       }
+      async function deleteComment(commentId) {
+        try {
+          const response = await fetch(`${url}/comments/comment/${commentId}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          if (!response.ok) {
+            console.error("Failed to delete comment");
+          }
+        } catch (error) {
+          console.error("Error deleting comment:", error);
+        }
+      }
+
       function setCookie(name, value, minsToLive) {
         const date = new Date();
         date.setTime(date.getTime() + minsToLive * 60 * 1000);

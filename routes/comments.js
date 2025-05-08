@@ -10,7 +10,8 @@ const { authToken } = require("../middleware/authToken");
 
 //  imports
 router.post("/create", authToken, createComment);
-router.post("/delete", authToken, deleteComment);
+router.delete("/comment/:commentId", authToken, deleteComment);
+
 router.get("/:ticker", authToken, getStockComments);
 
 module.exports = router;

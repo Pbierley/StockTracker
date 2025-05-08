@@ -1,4 +1,5 @@
 const { connectToDB } = require("../db/mongoClient");
+const { MongoClient, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const secretKey = process.env.JSON_WEB_KEY;
 
@@ -26,19 +27,30 @@ const createComment = async (req, res) => {
 };
 
 const deleteComment = async (req, res) => {
-  console.log("comment would be deleted here");
   const { commentId } = req.params;
-  console.log("commentId");
+  const username = req.user?.username; // assuming your authToken middleware sets this
+  console.log("Trying to delete comment:", commentId, "by user:", username);
+
   try {
     const db = await connectToDB();
     const comments = db.collection("comments");
 
-    // Delete the comment from the "comments" collection
-    const result = await comments.deleteOne({ _id: new ObjectId(commentId) });
+    // First, find the comment
+    const comment = await comments.findOne({ _id: new ObjectId(commentId) });
 
-    if (result.deletedCount === 0) {
+    if (!comment) {
       return res.status(404).json({ error: "Comment not found." });
     }
+
+    // Check if the comment belongs to the user
+    if (comment.username !== username) {
+      return res
+        .status(403)
+        .json({ error: "Unauthorized to delete this comment." });
+    }
+
+    // Now delete it
+    const result = await comments.deleteOne({ _id: new ObjectId(commentId) });
 
     res.status(200).json({ message: "Comment deleted successfully." });
   } catch (error) {
