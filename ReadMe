@@ -7,3 +7,6 @@ From there you are able to sign up or log in and view the stocks and other peopl
 You are also capable of adding new stocks to the data base by clicking Get Price With a Ticker Inserted in the "Enter Stock Ticker" text box.
 Any new stock will fetch data from polygon and alphavantage to get information about the stock and also trading data.
 Once your done using the application you are able to log out and all cookies on both the front end and the jwt cookie stored on the backend will be cleared.
+
+
+I also worked alone and contributed all of the code.
